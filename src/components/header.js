@@ -4,7 +4,7 @@ export default function Header() {
     return(
         <header style={{
             backgroundColor: '#F8F8F8',
-            padding: '15px 30px',
+            padding: '10px 30px',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center'
