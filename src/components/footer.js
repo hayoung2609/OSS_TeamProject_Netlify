@@ -12,4 +12,4 @@ export default function Footer() {
             <p>© 2025 Recipe App. Hyewon&Hayoung</p>
         </footer>
     );
-}
+} 
