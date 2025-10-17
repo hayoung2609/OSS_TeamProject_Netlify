@@ -1,3 +1,4 @@
+// src/pages/HomePage.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RandomRecipe from '../components/RandomRecipe';
@@ -56,11 +57,16 @@ function HomePage() {
         <>
             {randomRecipe && <RandomRecipe recipe={randomRecipe} onClick={() => handleCardClick(randomRecipe.id)} />}
             
-            <div className="text-center mb-12">
+            <div className="text-center mb-8 flex justify-center items-center gap-4">
                 <button 
                     onClick={recommendRandomRecipe} 
                     className="bg-yellow-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-yellow-600 transition-all duration-300 transform hover:-translate-y-1">
                     다른 레시피 추천받기!
+                </button>
+                <button 
+                    onClick={() => navigate('/add-recipe')} 
+                    className="bg-green-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-green-600 transition-all duration-300 transform hover:-translate-y-1">
+                    레시피 추가하기
                 </button>
             </div>
             

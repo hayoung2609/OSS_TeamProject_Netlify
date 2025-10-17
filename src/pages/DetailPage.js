@@ -1,11 +1,13 @@
+// src/pages/DetailPage.js
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 function DetailPage() {
     const { id } = useParams();
     const [recipe, setRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchRecipe = async () => {
@@ -25,6 +27,19 @@ function DetailPage() {
         fetchRecipe();
     }, [id]);
 
+    const handleDelete = async () => {
+        if (window.confirm("정말로 이 레시피를 삭제하시겠습니까?")) {
+            try {
+                await axios.delete(`${process.env.REACT_APP_API_URL}/${id}`);
+                alert("레시피가 삭제되었습니다.");
+                navigate('/');
+            } catch (error) {
+                console.error("레시피 삭제에 실패했습니다.", error);
+                alert("레시피 삭제에 실패했습니다.");
+            }
+        }
+    };
+
     if (loading) {
         return (
             <div className="flex justify-center items-center h-screen">
@@ -41,11 +56,19 @@ function DetailPage() {
 
     return (
         <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8">
-            <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-4">{recipe.recipeName}</h1>
-            <div className="flex items-center gap-4 my-3 text-gray-600 flex-wrap">
-                <span className="bg-yellow-100 text-yellow-800 text-sm font-medium px-2.5 py-0.5 rounded-full">{recipe.category}</span>
-                <span className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded-full">{recipe.cookingMethod}</span>
-                <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full">{recipe.calorie} kcal</span>
+            <div className="flex justify-between items-start">
+                <div>
+                    <h1 className="text-4xl sm:text-5xl font-bold text-gray-800 mb-4">{recipe.recipeName}</h1>
+                    <div className="flex items-center gap-4 my-3 text-gray-600 flex-wrap">
+                        <span className="bg-yellow-100 text-yellow-800 text-sm font-medium px-2.5 py-0.5 rounded-full">{recipe.category}</span>
+                        <span className="bg-green-100 text-green-800 text-sm font-medium px-2.5 py-0.5 rounded-full">{recipe.cookingMethod}</span>
+                        <span className="bg-blue-100 text-blue-800 text-sm font-medium px-2.5 py-0.5 rounded-full">{recipe.calorie} kcal</span>
+                    </div>
+                </div>
+                <div className="flex gap-2">
+                    <button onClick={() => navigate(`/recipe/${id}/edit`)} className="bg-blue-500 text-white font-bold py-2 px-4 rounded-md hover:bg-blue-600 transition-colors">수정</button>
+                    <button onClick={handleDelete} className="bg-red-500 text-white font-bold py-2 px-4 rounded-md hover:bg-red-600 transition-colors">삭제</button>
+                </div>
             </div>
             <img 
                 src={recipe.recipeImage} 

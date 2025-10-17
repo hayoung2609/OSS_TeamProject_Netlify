@@ -1,9 +1,8 @@
+// src/App.js
 import React from 'react';
 import { BrowserRouter } from 'react-router-dom';
 import AppRouter from './router/Router';
 import './App.css';
-import Header from './component/header.js';
-import Footer from './component/footer.js';
 
 function App() {
   return (
