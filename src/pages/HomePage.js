@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { processData } from '../api/data';
 import RandomRecipe from '../components/RandomRecipe';
 import RecipeCard from '../components/RecipeCard';
 import axios from 'axios';
@@ -15,14 +14,13 @@ function HomePage() {
         const fetchAndSetRecipes = async () => {
             setLoading(true);
             try {
-                const apiUrl = process.env.REACT_APP_MOCK_API_URL;
+                const apiUrl = process.env.REACT_APP_API_URL;
                 const response = await axios.get(apiUrl);
-                const processed = processData(response.data);
                 
-                setRecipes(processed);
+                setRecipes(response.data);
                 
-                if (processed.length > 0) {
-                    setRandomRecipe(processed[Math.floor(Math.random() * processed.length)]);
+                if (response.data.length > 0) {
+                    setRandomRecipe(response.data[Math.floor(Math.random() * response.data.length)]);
                 }
             } catch (error) {
                 console.error("레시피 데이터를 불러오는 데 실패했습니다.", error);

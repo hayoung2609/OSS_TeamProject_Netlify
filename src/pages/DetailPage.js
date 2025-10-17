@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { processData } from '../api/data';
 import axios from 'axios';
 
 function DetailPage() {
@@ -12,12 +11,9 @@ function DetailPage() {
         const fetchRecipe = async () => {
             setLoading(true);
             try {
-                const apiUrl = `${process.env.REACT_APP_MOCK_API_URL}/${id}`;
+                const apiUrl = `${process.env.REACT_APP_API_URL}/${id}`;
                 const response = await axios.get(apiUrl);
-                const processed = processData(response.data);
-                
-                setRecipe(processed);
-
+                setRecipe(response.data);
             } catch (error) {
                 console.error("레시피 상세 정보를 불러오는 데 실패했습니다.", error);
                 setRecipe(null);
@@ -58,15 +54,35 @@ function DetailPage() {
                 onError={(e) => { e.target.onerror = null; e.target.src='https://placehold.co/800x400/F7F7F7/CCC?text=Image\nNot\nFound' }}
             />
             
-            <div className="space-y-6">
+            <div className="space-y-8">
                 <div>
-                    <h2 className="text-2xl font-bold text-gray-700 mb-2 border-l-4 border-yellow-400 pl-4">📋 재료</h2>
+                    <h2 className="text-2xl font-bold text-gray-700 mb-3 border-l-4 border-yellow-400 pl-4">📋 재료</h2>
                     <p className="text-gray-700 whitespace-pre-line">{recipe.ingredients}</p>
                 </div>
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-700 mb-2 border-l-4 border-yellow-400 pl-4">💡 저염 조리법 Tip!</h2>
-                    <p className="text-gray-700">{recipe.tip}</p>
-                </div>
+                
+                {recipe.manual && recipe.manual.length > 0 && (
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-700 mb-4 border-l-4 border-yellow-400 pl-4">📖 요리 순서</h2>
+                        <div className="space-y-6">
+                            {recipe.manual.map((step, index) => (
+                                <div key={index} className="flex flex-col sm:flex-row items-start gap-4">
+                                    <img src={step.image} alt={`Step ${step.step}`} className="w-full sm:w-48 h-auto rounded-md shadow-sm" />
+                                    <p className="text-gray-700">
+                                        <span className="font-bold text-lg mr-2">{step.step}.</span>
+                                        {step.text}
+                                    </p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {recipe.tip && (
+                    <div>
+                        <h2 className="text-2xl font-bold text-gray-700 mb-3 border-l-4 border-yellow-400 pl-4">💡 Tip!</h2>
+                        <p className="text-gray-700">{recipe.tip}</p>
+                    </div>
+                )}
             </div>
         </div>
     );
