@@ -1,16 +1,15 @@
+// src/components/header.js
 import React from "react";
+import { Link } from 'react-router-dom';
 
 export default function Header() {
     return(
-        <header style={{
-            backgroundColor: '#F8F8F8',
-            padding: '15px 30px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-            }}>
-        <h2>Recipe App</h2>
-
+        <header className="bg-white shadow-md">
+            <div className="container mx-auto px-4 sm:px-8 py-4 flex justify-between items-center">
+                <Link to="/" className="text-2xl font-bold text-yellow-500">
+                   🍳 Recipe App
+                </Link>
+            </div>
         </header>
     )
 }

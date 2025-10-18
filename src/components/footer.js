@@ -1,15 +1,10 @@
+// src/components/footer.js
 import React from "react";
 
 export default function Footer() {
     return (
-        <footer style={{
-            textAlign: 'center',
-            padding: '20px',
-            backgroundColor: '#F8F8F8',
-            borderTop: '1px solid #ddd',
-            marginTop: '50px'
-        }}>
-            <p>© 2025 Recipe App. Hyewon&Hayoung</p>
+        <footer className="bg-gray-100 text-center py-6 mt-12">
+            <p className="text-gray-500 text-sm">© 2025 Recipe App. Hyewon&Hayoung</p>
         </footer>
     );
-} 
+}
