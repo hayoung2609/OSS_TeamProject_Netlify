@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
+import Header from "../components/header";
+import Footer from "../components/footer";
 import axios from 'axios';
 
 function DetailPage() {
@@ -29,6 +31,7 @@ function DetailPage() {
         return (
             <div className="flex justify-center items-center h-screen">
                 <div className="text-2xl font-semibold text-gray-600">
+                    <br></br>
                     🍳 레시피를 불러오는 중...
                 </div>
             </div>
