@@ -1,7 +1,6 @@
 // src/pages/HomePage.js
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-
 import axios from 'axios';
 import RecipeCard from '../components/RecipeCard';
 import RandomRecipe from '../components/RandomRecipe'; // RandomRecipe 컴포넌트 임포트 확인
@@ -48,6 +47,7 @@ function HomePage() {
     const handleCardClick = (id) => {
         navigate(`/recipe/${id}`);
     };
+
     // --- 검색어 변경 핸들러 ---
     const handleSearchChange = (event) => {
         setSearchTerm(event.target.value);

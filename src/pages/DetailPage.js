@@ -179,7 +179,6 @@ function DetailPage() {
         return (
              <div className="flex justify-center items-center h-screen">
                 <div className="text-2xl font-semibold text-gray-600">
-                    <br></br>
                     🍳 레시피를 불러오는 중...
                 </div>
             </div>
