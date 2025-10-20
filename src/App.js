@@ -9,11 +9,11 @@ import './App.css';
 function App() {
   return (
     <BrowserRouter>
-      <div className="flex flex-col min-h-screen bg-gray-50">
+      {/* 배경색은 이제 index.css에서 전역으로 관리합니다 */}
+      <div className="flex flex-col min-h-screen">
         <Header />
-        <main className="flex-grow container mx-auto p-4 sm:p-8">
-          <AppRouter />
-        </main>
+        {/* 페이지별로 다른 최대 너비를 가질 수 있으므로 main 태그는 각 페이지로 이동 */}
+        <AppRouter />
         <Footer />
       </div>
     </BrowserRouter>

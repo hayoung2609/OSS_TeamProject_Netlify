@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* body에 기본 배경색과 글자색을 tailwind.config.js에 정의한 색상으로 적용 */
+body {
+  @apply bg-background text-text-primary;
+  scroll-behavior: smooth; /* 부드러운 스크롤 효과 */
+}
