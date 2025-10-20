@@ -57,14 +57,99 @@ function DetailPage() {
          // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [id]);
 
-    const handleDelete = () => { /* ... */ };
-    const handleAddComment = (newComment) => { /* ... */ };
-    const handleDeleteComment = (indexToDelete) => { /* ... */ };
-    const handleEditStart = (index, content) => { /* ... */ };
-    const handleEditChange = (e) => { /* ... */ };
-    const handleEditSave = (index) => { /* ... */ };
-    const handleEditCancel = () => { /* ... */ };
-    const handleRate = async (rating) => { /* ... */ };
+    const handleDelete = async () => {
+        if (window.confirm("정말로 이 레시피를 삭제하시겠습니까?")) {
+            try {
+                await axios.delete(`${process.env.REACT_APP_API_URL}/${id}`);
+                alert("레시피가 삭제되었습니다.");
+                navigate('/');
+            } catch (error) {
+                console.error("레시피 삭제에 실패했습니다.", error);
+                alert("레시피 삭제에 실패했습니다.");
+            }
+        }
+    };
+
+    const handleAddComment = (newComment) => {
+        const updatedComments = [...comments, newComment];
+        setComments(updatedComments);
+        updateRecipeData({ comments: updatedComments });
+    };
+    const handleDeleteComment = (indexToDelete) => {
+        if (window.confirm("정말로 이 댓글을 삭제하시겠습니까?")) {
+            const updatedComments = comments.filter((_, index) => index !== indexToDelete);
+            setComments(updatedComments);
+            updateRecipeData({ comments: updatedComments }); // API 업데이트
+            if (editingIndex === indexToDelete) {
+                setEditingIndex(null);
+                setEditText('');
+            }
+        }
+    };
+
+    const handleEditStart = (indexToEdit, currentContent) => {
+         setEditingIndex(indexToEdit);
+         setEditText(currentContent);
+     };
+    const handleEditChange = (event) => {
+         setEditText(event.target.value);
+     };
+
+    const handleEditSave = (indexToSave) => {
+        if (!editText.trim()) {
+            alert('댓글 내용을 입력해주세요.');
+            return;
+        }
+        const updatedComments = comments.map((comment, index) =>
+            index === indexToSave ? { ...comment, content: editText, timestamp: new Date().toISOString() } : comment
+        );
+        setComments(updatedComments);
+        updateRecipeData({ comments: updatedComments }); // API 업데이트
+        setEditingIndex(null);
+        setEditText('');
+    };
+
+    const handleEditCancel = () => {
+         setEditingIndex(null);
+         setEditText('');
+     };
+    
+    const handleSelectRating = (rating) => {
+        if (loading || !recipe) return;
+
+        setUserRating(rating);
+    };
+
+    const handleSubmitRating = () => {
+        // 로딩 중이거나, 레시피가 없거나, 평점을 선택하지 않았으면(0점) 중단
+        if (loading || !recipe || userRating === 0) {
+            alert("평점을 1점 이상 선택해주세요.");
+            return;
+        }
+
+        // --- 새 평균 평점 및 참여자 수 계산 ---
+        const currentTotalRating = averageRating * ratingCount;
+        const newRatingCount = ratingCount + 1;
+        // 중요: state에 저장된 userRating을 사용합니다.
+        const newAverageRating = (currentTotalRating + userRating) / newRatingCount;
+
+        setAverageRating(newAverageRating);
+        setRatingCount(newRatingCount);
+        
+        const updatedRecipe = {
+            ...recipe,
+            averageRating: newAverageRating,
+            ratingCount: newRatingCount
+        };
+
+        setRecipe(updatedRecipe);
+
+        alert(`${userRating}점을 주셔서 감사합니다! 평점이 등록되었습니다.`);
+
+        updateRecipeData(updatedRecipe);
+        
+        setUserRating(0);
+    };
 
     if (loading && !recipe) {
         return <div className="text-center py-20 text-brand-dark font-semibold">🍳 레시피를 불러오는 중...</div>;
@@ -144,8 +229,13 @@ function DetailPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                     <section>
                          <h2 className="text-2xl font-bold text-gray-800 mb-4">⭐ 이 레시피 평가하기</h2>
-                         <StarRating maxRating={5} currentRating={userRating} onRate={handleRate} />
-                         {userRating > 0 && <p className="text-sm text-text-secondary mt-2">{userRating}점을 선택하셨습니다. 감사합니다!</p>}
+                         <StarRating maxRating={5} currentRating={userRating} onRate={handleSelectRating}/>
+                         {userRating > 0 && (
+                            <div className="mt-3">
+                                <p className="text-sm text-gray-600 mb-2"> {userRating}점을 선택하셨습니다.</p>
+                                <button onClick={handleSubmitRating} className="bg-green-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-green-600 transition-colors text-sm">평점 남기기</button>
+                            </div>
+                        )}
                     </section>
                     <section>
                         <h2 className="text-2xl font-bold text-gray-800 mb-4">💬 댓글</h2>
