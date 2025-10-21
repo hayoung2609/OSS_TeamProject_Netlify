@@ -44,11 +44,31 @@ function HomePage() {
     const handleSearchChange = (event) => setSearchTerm(event.target.value);
 
     const filteredAndSortedRecipes = useMemo(() => {
+        // 1. 검색어 필터링
         const filtered = recipes.filter(recipe =>
             recipe.recipeName.toLowerCase().includes(searchTerm.toLowerCase())
         );
-        let sorted = [...filtered];
-        // ... (정렬 로직은 그대로 유지) ...
+
+        // 2. 정렬 적용
+        let sorted = [...filtered]; // 필터링된 배열 복사
+        switch (sortOrder) {
+            case 'popularity':
+                 // 임시 정렬 (실제 views 필드 필요)
+                 sorted.sort((a, b) => parseInt(b.id) * 2 - parseInt(a.id) * 2);
+                break;
+            case 'rating':
+                 // 임시 정렬 (실제 averageRating 필드 필요)
+                 sorted.sort((a, b) => parseInt(a.id) - parseInt(b.id));
+                break;
+            case 'reviews':
+                 // 임시 정렬 (실제 comments 필드 필요)
+                 sorted.sort((a, b) => parseInt(a.id) * 2 - parseInt(b.id) * 2);
+                break;
+            case 'latest':
+            default:
+                sorted.sort((a, b) => parseInt(b.id) - parseInt(a.id));
+                break;
+        }
         return sorted;
     }, [recipes, sortOrder, searchTerm]);
 
