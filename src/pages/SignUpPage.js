@@ -1,116 +1,113 @@
-// src/pages/SignUpPage.js
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import React from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Container, Box, Typography, TextField, Button, Link, Alert } from '@mui/material';
 
 function SignUpPage() {
-    const [username, setUsername] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState(''); // 오류 메시지 상태
+    const { register, handleSubmit, formState: { errors }, getValues } = useForm();
     const navigate = useNavigate();
 
-    const handleSignUp = (e) => {
-        e.preventDefault();
-        setError(''); // 오류 메시지 초기화
-
-        // 간단한 유효성 검사
-        if (password !== confirmPassword) {
-            setError('비밀번호가 일치하지 않습니다.');
-            return;
-        }
-        if (password.length < 6) {
-            setError('비밀번호는 6자 이상이어야 합니다.');
-            return;
-        }
-
-        // 실제 회원가입 로직은 없습니다.
-        console.log('Sign up attempt with:', { username, email, password });
+    const onSubmit = (data) => {
+        console.log('Sign up attempt with:', data);
         alert('회원가입 되었습니다! (실제 등록 없음)');
-        navigate('/login'); // 회원가입 성공 시 로그인 페이지로 이동 (임시)
+        navigate('/login');
     };
 
+    const topError = errors[Object.keys(errors)[0]]?.message;
+
     return (
-        <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-2xl shadow-lg">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">회원가입</h1>
-            {error && <p className="text-red-500 text-sm mb-4 text-center">{error}</p>} {/* 오류 메시지 표시 */}
-            <form onSubmit={handleSignUp} className="space-y-4">
-                <div>
-                    <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-                        사용자 이름
-                    </label>
-                    <input
-                        type="text"
+        <Container component="main" maxWidth="xs">
+            <Box
+                sx={{
+                    marginTop: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    backgroundColor: 'white',
+                    padding: 4,
+                    borderRadius: 3,
+                    boxShadow: 3,
+                }}
+            >
+                <Typography component="h1" variant="h5" sx={{ mb: 1 }}>
+                    회원가입
+                </Typography>
+                {/* 상단 에러 메시지 (MUI Alert 사용) */}
+                {topError && <Alert severity="error" sx={{ width: '100%', mt: 2, mb: 1 }}>{topError}</Alert>}
+                <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, width: '100%' }}>
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
                         id="username"
-                        name="username"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                        placeholder="사용할 이름을 입력하세요"
+                        label="사용자 이름"
+                        autoComplete="username"
+                        autoFocus
+                        {...register("username", { required: "사용자 이름은 필수입니다." })}
+                        error={!!errors.username}
+                        helperText={errors.username?.message} // 필드별 에러 메시지는 helperText로
                     />
-                </div>
-                <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        이메일 주소
-                    </label>
-                    <input
-                        type="email"
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
                         id="email"
-                        name="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                        placeholder="you@example.com"
+                        label="이메일 주소"
+                        autoComplete="email"
+                        {...register("email", {
+                            required: "이메일 주소는 필수입니다.",
+                            pattern: { value: /^\S+@\S+$/i, message: "올바른 이메일 형식이 아닙니다." }
+                        })}
+                        error={!!errors.email}
+                        helperText={errors.email?.message}
                     />
-                </div>
-                <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        비밀번호
-                    </label>
-                    <input
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="비밀번호"
                         type="password"
                         id="password"
-                        name="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                        placeholder="6자 이상 입력하세요"
+                        autoComplete="new-password"
+                        {...register("password", {
+                            required: "비밀번호는 필수입니다.",
+                            minLength: { value: 6, message: "비밀번호는 6자 이상이어야 합니다." }
+                        })}
+                        error={!!errors.password}
+                        helperText={errors.password?.message}
                     />
-                </div>
-                <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                        비밀번호 확인
-                    </label>
-                    <input
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="비밀번호 확인"
                         type="password"
                         id="confirmPassword"
-                        name="confirmPassword"
-                        value={confirmPassword}
-                        onChange={(e) => setConfirmPassword(e.target.value)}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                        placeholder="비밀번호를 다시 입력하세요"
+                        autoComplete="new-password"
+                        {...register("confirmPassword", {
+                            required: "비밀번호 확인은 필수입니다.",
+                            validate: (value) => value === getValues("password") || "비밀번호가 일치하지 않습니다."
+                        })}
+                        error={!!errors.confirmPassword}
+                        helperText={errors.confirmPassword?.message}
                     />
-                </div>
-                <div>
-                    <button
+                    <Button
                         type="submit"
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-green-500 hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+                        fullWidth
+                        variant="contained"
+                        sx={{ mt: 3, mb: 2, backgroundColor: '#22c55e', '&:hover': { backgroundColor: '#16a34a' } }}
                     >
                         가입하기
-                    </button>
-                </div>
-            </form>
-            <p className="mt-6 text-center text-sm text-gray-600">
-                이미 계정이 있으신가요?{' '}
-                <Link to="/login" className="font-medium text-yellow-600 hover:text-yellow-500">
-                    로그인
-                </Link>
-            </p>
-        </div>
+                    </Button>
+                    <Typography variant="body2" align="center">
+                        이미 계정이 있으신가요?{' '}
+                        <Link component={RouterLink} to="/login" variant="body2" sx={{ color: '#ca8a04', '&:hover': { color: '#eab308' } }}>
+                            로그인
+                        </Link>
+                    </Typography>
+                </Box>
+            </Box>
+        </Container>
     );
 }
 

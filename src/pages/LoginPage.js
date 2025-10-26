@@ -1,72 +1,84 @@
-// src/pages/LoginPage.js
-import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom'; // Link 임포트 추가
+import React from 'react';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { Container, Box, Typography, TextField, Button, Link } from '@mui/material'; // MUI 컴포넌트 임포트
 
 function LoginPage() {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
+    const { register, handleSubmit, formState: { errors } } = useForm();
     const navigate = useNavigate();
 
-    const handleLogin = (e) => {
-        e.preventDefault();
-        console.log('Login attempt with:', { email, password });
+    const onSubmit = (data) => {
+        console.log('Login attempt with:', data);
         alert('로그인 되었습니다! (실제 인증 없음)');
         navigate('/');
     };
 
     return (
-        <div className="max-w-md mx-auto mt-10 bg-white p-8 rounded-2xl shadow-lg">
-            <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">로그인</h1>
-            <form onSubmit={handleLogin} className="space-y-6">
-                {/* ... (이메일, 비밀번호 입력 필드) ... */}
-                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-                        이메일 주소
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
+        // Tailwind 대신 MUI Container와 Box로 레이아웃 구성
+        <Container component="main" maxWidth="xs">
+            <Box
+                sx={{
+                    marginTop: 8,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    backgroundColor: 'white', // 배경색
+                    padding: 4, // 패딩
+                    borderRadius: 3, // 둥근 모서리
+                    boxShadow: 3, // 그림자
+                }}
+            >
+                {/* h1 대신 Typography */}
+                <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
+                    로그인
+                </Typography>
+                {/* form에 handleSubmit 연결 */}
+                <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1, width: '100%' }}>
+                    {/* input 대신 TextField */}
+                    <TextField
+                        margin="normal"
                         required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                        placeholder="you@example.com"
+                        fullWidth
+                        id="email"
+                        label="이메일 주소"
+                        autoComplete="email"
+                        autoFocus
+                        // react-hook-form 연동 + 에러 처리
+                        {...register("email", { required: "이메일 주소는 필수입니다." })}
+                        error={!!errors.email}
+                        helperText={errors.email?.message}
                     />
-                </div>
-                <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                        비밀번호
-                    </label>
-                    <input
+                    <TextField
+                        margin="normal"
+                        required
+                        fullWidth
+                        label="비밀번호"
                         type="password"
                         id="password"
-                        name="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-yellow-500 focus:border-yellow-500 sm:text-sm"
-                        placeholder="********"
+                        autoComplete="current-password"
+                        {...register("password", { required: "비밀번호는 필수입니다." })}
+                        error={!!errors.password}
+                        helperText={errors.password?.message}
                     />
-                </div>
-                <div>
-                    <button
+                    {/* button 대신 Button */}
+                    <Button
                         type="submit"
-                        className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-yellow-500 hover:bg-yellow-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors"
+                        fullWidth
+                        variant="contained" // MUI 기본 스타일 버튼
+                        sx={{ mt: 3, mb: 2, backgroundColor: '#fbbf24', '&:hover': { backgroundColor: '#f59e0b' } }} // Tailwind 색상 유사하게 적용
                     >
                         로그인
-                    </button>
-                </div>
-            </form>
-            {/* --- 회원가입 링크 추가 --- */}
-            <p className="mt-6 text-center text-sm text-gray-600">
-                계정이 없으신가요?{' '}
-                <Link to="/signup" className="font-medium text-green-600 hover:text-green-500">
-                    회원가입
-                </Link>
-            </p>
-            {/* --- --- --- --- --- */}
-        </div>
+                    </Button>
+                    {/* react-router Link 대신 MUI Link 사용 (RouterLink 연결) */}
+                    <Typography variant="body2" align="center">
+                        계정이 없으신가요?{' '}
+                        <Link component={RouterLink} to="/signup" variant="body2" sx={{ color: '#16a34a', '&:hover': { color: '#22c55e' } }}>
+                            회원가입
+                        </Link>
+                    </Typography>
+                </Box>
+            </Box>
+        </Container>
     );
 }
 

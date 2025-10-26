@@ -3,21 +3,28 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import RecipeCard from '../components/RecipeCard';
-import RandomRecipe from '../components/RandomRecipe'; // RandomRecipe 컴포넌트 임포트 확인
+import RandomRecipe from '../components/RandomRecipe';
+import { useForm } from 'react-hook-form'; // 1. useForm 임포트
 
 function HomePage() {
     const [recipes, setRecipes] = useState([]);
     const [randomRecipe, setRandomRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const [sortOrder, setSortOrder] = useState('latest');
+    
+    // 2. useState 대신 useForm 사용
+    const { register, watch } = useForm({
+        defaultValues: {
+            searchTerm: '',
+            sortOrder: 'latest'
+        }
+    });
 
-    // --- 검색어 상태 추가 ---
-    const [searchTerm, setSearchTerm] = useState('');
-    // --- --- --- --- ---
+    // 3. watch로 폼 값 실시간 추적
+    const searchTerm = watch('searchTerm');
+    const sortOrder = watch('sortOrder');
 
     useEffect(() => {
-        // ... (fetchAndSetRecipes 로직은 동일) ...
         const fetchAndSetRecipes = async () => {
             setLoading(true);
             try {
@@ -38,42 +45,31 @@ function HomePage() {
     }, []);
 
     const recommendRandomRecipe = useCallback(() => {
-         if (recipes.length > 0) {
+        if (recipes.length > 0) {
             const randomIndex = Math.floor(Math.random() * recipes.length);
             setRandomRecipe(recipes[randomIndex]);
         }
-     }, [recipes]);
+    }, [recipes]);
 
-    const handleCardClick = (id) => {
-        navigate(`/recipe/${id}`);
-    };
+    const handleCardClick = (id) => navigate(`/recipe/${id}`);
+    
+    // 4. handleSearchChange 제거 (react-hook-form이 관리)
 
-    // --- 검색어 변경 핸들러 ---
-    const handleSearchChange = (event) => {
-        setSearchTerm(event.target.value);
-    };
-    // --- --- --- --- --- ---
-
-    // --- 정렬 및 필터링된 레시피 목록 계산 ---
+    // 원본 정렬 로직 그대로 유지
     const filteredAndSortedRecipes = useMemo(() => {
-        // 1. 검색어 필터링
         const filtered = recipes.filter(recipe =>
             recipe.recipeName.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-        // 2. 정렬 적용
-        let sorted = [...filtered]; // 필터링된 배열 복사
+        let sorted = [...filtered]; 
         switch (sortOrder) {
             case 'popularity':
-                 // 임시 정렬 (실제 views 필드 필요)
                  sorted.sort((a, b) => parseInt(b.id) * 2 - parseInt(a.id) * 2);
                 break;
             case 'rating':
-                 // 임시 정렬 (실제 averageRating 필드 필요)
                  sorted.sort((a, b) => parseInt(a.id) - parseInt(b.id));
                 break;
             case 'reviews':
-                 // 임시 정렬 (실제 comments 필드 필요)
                  sorted.sort((a, b) => parseInt(a.id) * 2 - parseInt(b.id) * 2);
                 break;
             case 'latest':
@@ -82,80 +78,71 @@ function HomePage() {
                 break;
         }
         return sorted;
-    }, [recipes, sortOrder, searchTerm]); // searchTerm 추가
-    // --- --- --- --- --- --- --- --- --- ---
+    }, [recipes, sortOrder, searchTerm]); // 의존성 배열에 react-hook-form state 반영
 
-    if (loading) { /* ... 로딩 UI ... */ }
+    if (loading) {
+        return <div className="text-center py-20 text-brand-dark font-semibold">🍳 맛있는 레시피를 불러오는 중...</div>;
+    }
 
     return (
-        <div className="max-w-4xl mx-auto">
-            <header className="text-center mb-10">
-                <h1 className="text-4xl sm:text-5xl font-bold text-gray-800">오늘 뭐 먹지?</h1>
-                <p className="text-gray-500 mt-2">버튼을 눌러 오늘의 특별한 레시피를 추천받아보세요!</p>
+        <main className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+            <header className="text-center mb-12">
+                <h1 className="text-4xl sm:text-5xl font-extrabold text-text-primary">오늘 뭐 먹지?</h1>
+                <p className="text-text-secondary mt-3 text-lg">버튼을 눌러 오늘의 특별한 레시피를 추천받아보세요!</p>
             </header>
 
             {randomRecipe && <RandomRecipe recipe={randomRecipe} onClick={() => handleCardClick(randomRecipe.id)} />}
 
-            <div className="text-center my-8 flex justify-center items-center gap-4">
+            <div className="text-center my-10 flex flex-col sm:flex-row justify-center items-center gap-4">
                 <button
                     onClick={recommendRandomRecipe}
-                    className="bg-yellow-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-yellow-600 transition-all duration-300 transform hover:-translate-y-1">
-                    다른 레시피 추천!
+                    className="bg-brand-dark text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-orange-600 transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto">
+                    🔄 다른 레시피 추천!
                 </button>
                 <button
                     onClick={() => navigate('/add-recipe')}
-                    className="bg-green-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-green-600 transition-all duration-300 transform hover:-translate-y-1">
-                    레시피 추가
+                    className="bg-emerald-500 text-white font-bold py-3 px-8 rounded-full shadow-lg hover:bg-emerald-600 transition-all duration-300 transform hover:-translate-y-1 w-full sm:w-auto">
+                    ✨ 레시피 추가하기
                 </button>
             </div>
 
-            {/* --- 레시피 목록 섹션 --- */}
-            <div>
-                 <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                    <h2 className="text-2xl font-bold text-gray-700 border-l-4 border-yellow-400 pl-4">
-                        전체 레시피 목록
-                    </h2>
-                    <div className="flex gap-4 w-full sm:w-auto">
-                        {/* --- 검색 입력 필드 추가 --- */}
+            <section className="mt-16">
+                 <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
+                    <h2 className="text-3xl font-bold text-text-primary">모든 레시피</h2>
+                    
+                    {/* 5. form 태그로 감싸고 register 적용 */}
+                    <form className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <input
                             type="text"
-                            placeholder="레시피 이름 검색..."
-                            value={searchTerm}
-                            onChange={handleSearchChange}
-                            className="border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-500 flex-grow sm:flex-grow-0"
+                            placeholder="레시피 이름으로 검색..."
+                            {...register("searchTerm")} // 6. register 적용
+                            className="border border-gray-300 rounded-full py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark w-full sm:w-48"
                         />
-                        {/* --- --- --- --- --- --- */}
-
-                        {/* --- 정렬 드롭다운 --- */}
                         <select
-                            value={sortOrder}
-                            onChange={(e) => setSortOrder(e.target.value)}
-                            className="border border-gray-300 rounded-md p-2 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-500"
+                            {...register("sortOrder")} // 7. register 적용
+                            className="border border-gray-300 rounded-full py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark w-full sm:w-auto"
                         >
                             <option value="latest">최신순</option>
                             <option value="popularity">인기순</option>
                             <option value="rating">평점순</option>
                             <option value="reviews">리뷰 많은 순</option>
                         </select>
-                         {/* --- --- --- --- --- */}
-                    </div>
+                    </form>
                  </div>
 
-                 {/* 필터링 및 정렬된 목록 표시 */}
                  {filteredAndSortedRecipes.length > 0 ? (
-                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                         {filteredAndSortedRecipes.map(recipe => (
                             <RecipeCard key={recipe.id} recipe={recipe} onClick={() => handleCardClick(recipe.id)} />
                         ))}
                     </div>
                  ) : (
-                     <p className="text-center text-gray-500 mt-8">
+                     <p className="text-center text-text-secondary py-16">
                          {searchTerm ? `"${searchTerm}"에 대한 검색 결과가 없습니다.` : "표시할 레시피가 없습니다."}
                      </p>
                  )}
-            </div>
-            {/* --- --- --- --- --- */}
-        </div>
+            </section>
+        </main>
     );
 }
 
