@@ -4,14 +4,25 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import RecipeCard from '../components/RecipeCard';
 import RandomRecipe from '../components/RandomRecipe';
+import { useForm } from 'react-hook-form'; // 1. useForm 임포트
 
 function HomePage() {
     const [recipes, setRecipes] = useState([]);
     const [randomRecipe, setRandomRecipe] = useState(null);
     const [loading, setLoading] = useState(true);
     const navigate = useNavigate();
-    const [sortOrder, setSortOrder] = useState('latest');
-    const [searchTerm, setSearchTerm] = useState('');
+    
+    // 2. useState 대신 useForm 사용
+    const { register, watch } = useForm({
+        defaultValues: {
+            searchTerm: '',
+            sortOrder: 'latest'
+        }
+    });
+
+    // 3. watch로 폼 값 실시간 추적
+    const searchTerm = watch('searchTerm');
+    const sortOrder = watch('sortOrder');
 
     useEffect(() => {
         const fetchAndSetRecipes = async () => {
@@ -41,27 +52,24 @@ function HomePage() {
     }, [recipes]);
 
     const handleCardClick = (id) => navigate(`/recipe/${id}`);
-    const handleSearchChange = (event) => setSearchTerm(event.target.value);
+    
+    // 4. handleSearchChange 제거 (react-hook-form이 관리)
 
+    // 원본 정렬 로직 그대로 유지
     const filteredAndSortedRecipes = useMemo(() => {
-        // 1. 검색어 필터링
         const filtered = recipes.filter(recipe =>
             recipe.recipeName.toLowerCase().includes(searchTerm.toLowerCase())
         );
 
-        // 2. 정렬 적용
-        let sorted = [...filtered]; // 필터링된 배열 복사
+        let sorted = [...filtered]; 
         switch (sortOrder) {
             case 'popularity':
-                 // 임시 정렬 (실제 views 필드 필요)
                  sorted.sort((a, b) => parseInt(b.id) * 2 - parseInt(a.id) * 2);
                 break;
             case 'rating':
-                 // 임시 정렬 (실제 averageRating 필드 필요)
                  sorted.sort((a, b) => parseInt(a.id) - parseInt(b.id));
                 break;
             case 'reviews':
-                 // 임시 정렬 (실제 comments 필드 필요)
                  sorted.sort((a, b) => parseInt(a.id) * 2 - parseInt(b.id) * 2);
                 break;
             case 'latest':
@@ -70,7 +78,7 @@ function HomePage() {
                 break;
         }
         return sorted;
-    }, [recipes, sortOrder, searchTerm]);
+    }, [recipes, sortOrder, searchTerm]); // 의존성 배열에 react-hook-form state 반영
 
     if (loading) {
         return <div className="text-center py-20 text-brand-dark font-semibold">🍳 맛있는 레시피를 불러오는 중...</div>;
@@ -101,17 +109,17 @@ function HomePage() {
             <section className="mt-16">
                  <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
                     <h2 className="text-3xl font-bold text-text-primary">모든 레시피</h2>
-                    <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
+                    
+                    {/* 5. form 태그로 감싸고 register 적용 */}
+                    <form className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
                         <input
                             type="text"
                             placeholder="레시피 이름으로 검색..."
-                            value={searchTerm}
-                            onChange={handleSearchChange}
+                            {...register("searchTerm")} // 6. register 적용
                             className="border border-gray-300 rounded-full py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark w-full sm:w-48"
                         />
                         <select
-                            value={sortOrder}
-                            onChange={(e) => setSortOrder(e.target.value)}
+                            {...register("sortOrder")} // 7. register 적용
                             className="border border-gray-300 rounded-full py-2 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-brand-dark w-full sm:w-auto"
                         >
                             <option value="latest">최신순</option>
@@ -119,7 +127,7 @@ function HomePage() {
                             <option value="rating">평점순</option>
                             <option value="reviews">리뷰 많은 순</option>
                         </select>
-                    </div>
+                    </form>
                  </div>
 
                  {filteredAndSortedRecipes.length > 0 ? (

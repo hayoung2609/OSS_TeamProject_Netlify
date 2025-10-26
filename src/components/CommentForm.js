@@ -1,43 +1,40 @@
-// src/components/CommentForm.js
-import React, { useState } from 'react';
+import React from 'react';
+import { useForm } from 'react-hook-form';
 
 function CommentForm({ onSubmit }) {
-    const [author, setAuthor] = useState('');
-    const [content, setContent] = useState('');
+    const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!author.trim() || !content.trim()) {
-            alert('작성자와 내용을 모두 입력해주세요.');
-            return;
-        }
-        onSubmit({ author, content, timestamp: new Date().toISOString() });
-        setAuthor(''); // 폼 초기화
-        setContent(''); // 폼 초기화
+    const onFormSubmit = (data) => {
+        onSubmit(data); 
+        reset();
     };
 
     return (
-        <form onSubmit={handleSubmit} className="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
+        <form onSubmit={handleSubmit(onFormSubmit)} className="mt-8 p-4 border border-gray-200 rounded-lg bg-gray-50">
             <h3 className="text-lg font-semibold text-gray-700 mb-4">댓글 남기기</h3>
             <div className="mb-4">
                 <input
                     type="text"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
                     placeholder="작성자 이름"
-                    className="w-full p-2 border rounded-md text-sm"
-                    maxLength={20}
+                    {...register("author", { 
+                        required: "작성자 이름은 필수입니다.", 
+                        maxLength: { value: 20, message: "이름은 20자 이내로 입력해주세요." }
+                    })}
+                    className={`w-full p-2 border rounded-md text-sm ${errors.author ? 'border-red-500' : 'border-gray-300'}`}
                 />
+                {errors.author && <p className="text-red-500 text-xs mt-1">{errors.author.message}</p>}
             </div>
             <div className="mb-4">
                 <textarea
-                    value={content}
-                    onChange={(e) => setContent(e.target.value)}
                     placeholder="댓글 내용을 입력하세요..."
-                    className="w-full p-2 border rounded-md text-sm"
+                    {...register("content", { 
+                        required: "댓글 내용은 필수입니다.",
+                        maxLength: { value: 300, message: "댓글은 300자 이내로 입력해주세요." }
+                    })}
+                    className={`w-full p-2 border rounded-md text-sm ${errors.content ? 'border-red-500' : 'border-gray-300'}`}
                     rows="3"
-                    maxLength={300}
                 />
+                {errors.content && <p className="text-red-500 text-xs mt-1">{errors.content.message}</p>}
             </div>
             <button
                 type="submit"
